@@ -10,9 +10,11 @@
 package plugin
 
 import (
+	context "context"
 	io "io"
 	reflect "reflect"
 
+	env "github.com/itbasis/go-tools-core/env"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -41,17 +43,17 @@ func (m *MockBasePlugin) EXPECT() *MockBasePluginMockRecorder {
 }
 
 // Exec mocks base method.
-func (m *MockBasePlugin) Exec(cli string, overrideEnv map[string]string, stdIn io.Reader, stdOut, stdErr io.Writer, args []string) error {
+func (m *MockBasePlugin) Exec(ctx context.Context, cli string, overrideEnv map[string]string, stdIn io.Reader, stdOut, stdErr io.Writer, args []string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Exec", cli, overrideEnv, stdIn, stdOut, stdErr, args)
+	ret := m.ctrl.Call(m, "Exec", ctx, cli, overrideEnv, stdIn, stdOut, stdErr, args)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Exec indicates an expected call of Exec.
-func (mr *MockBasePluginMockRecorder) Exec(cli, overrideEnv, stdIn, stdOut, stdErr, args any) *gomock.Call {
+func (mr *MockBasePluginMockRecorder) Exec(ctx, cli, overrideEnv, stdIn, stdOut, stdErr, args any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exec", reflect.TypeOf((*MockBasePlugin)(nil).Exec), cli, overrideEnv, stdIn, stdOut, stdErr, args)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exec", reflect.TypeOf((*MockBasePlugin)(nil).Exec), ctx, cli, overrideEnv, stdIn, stdOut, stdErr, args)
 }
 
 // GetSDKDir mocks base method.
@@ -108,4 +110,23 @@ func (m *MockBasePlugin) HasInstalled(pluginID ID, version string) bool {
 func (mr *MockBasePluginMockRecorder) HasInstalled(pluginID, version any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasInstalled", reflect.TypeOf((*MockBasePlugin)(nil).HasInstalled), pluginID, version)
+}
+
+// PrepareEnvironment mocks base method.
+func (m *MockBasePlugin) PrepareEnvironment(overrideEnv env.Map, envKeys ...string) env.Map {
+	m.ctrl.T.Helper()
+	varargs := []any{overrideEnv}
+	for _, a := range envKeys {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "PrepareEnvironment", varargs...)
+	ret0, _ := ret[0].(env.Map)
+	return ret0
+}
+
+// PrepareEnvironment indicates an expected call of PrepareEnvironment.
+func (mr *MockBasePluginMockRecorder) PrepareEnvironment(overrideEnv any, envKeys ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{overrideEnv}, envKeys...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrepareEnvironment", reflect.TypeOf((*MockBasePlugin)(nil).PrepareEnvironment), varargs...)
 }

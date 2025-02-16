@@ -100,8 +100,8 @@ github.com/itbasis/go-clock/v2 v2.1.0 h1:O8D37rq2aGrgn9iLl6u5sB190sczVU8iBh7GfgK
 github.com/itbasis/go-clock/v2 v2.1.0/go.mod h1:C2fmavKab/tAL/Q0IgAcd3sRtwwli8/fleTdCS467Gw=
 github.com/itbasis/go-test-utils/v5 v5.0.2 h1:MYMUcwv2g802OWb9iNSB83OqnFwsEty9AHV0F9yg6r4=
 github.com/itbasis/go-test-utils/v5 v5.0.2/go.mod h1:eknXXI9K1lJ9vBESfN6zXEPfIunACNYSPScofsOSlOE=
-github.com/itbasis/go-tools-core v0.0.0-20250216061144-b089f06f489d h1:nXdtHzJ8c//qmkMruQCCisJKkjnHKqjowTndEd1g1rg=
-github.com/itbasis/go-tools-core v0.0.0-20250216061144-b089f06f489d/go.mod h1:UTRddJAHG9lrcXH2y4P1fKAO6gG4d78hkAT9eTAh+I4=
+github.com/itbasis/go-tools-core v0.0.0-20250216185532-7bd5ed684646 h1:YAUOQb7jayHf56h9E9nbK7/H9wAOCGa7MckhR5BaQws=
+github.com/itbasis/go-tools-core v0.0.0-20250216185532-7bd5ed684646/go.mod h1:UTRddJAHG9lrcXH2y4P1fKAO6gG4d78hkAT9eTAh+I4=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
 github.com/jstemmer/go-junit-report v0.9.1/go.mod h1:Brl9GWCQeLvo8nXZwPNNblvFj/XSXhF0NWZEnDohbsk=
 github.com/kdomanski/iso9660 v0.4.0 h1:BPKKdcINz3m0MdjIMwS0wx1nofsOjxOq8TOr45WGHFg=

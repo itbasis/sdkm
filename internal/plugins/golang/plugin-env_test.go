@@ -6,7 +6,9 @@ import (
 	"path"
 	"strings"
 
+	itbasisCoreEnv "github.com/itbasis/go-tools-core/env"
 	itbasisCoreOs "github.com/itbasis/go-tools-core/os"
+	pluginBase "github.com/itbasis/go-tools-sdkm/internal/plugins/base"
 	sdkmPluginGo "github.com/itbasis/go-tools-sdkm/internal/plugins/golang"
 	pluginGoConsts "github.com/itbasis/go-tools-sdkm/internal/plugins/golang/consts"
 	sdkmPlugin "github.com/itbasis/go-tools-sdkm/pkg/plugin"
@@ -19,16 +21,10 @@ var _ = ginkgo.Describe(
 	"EnvByVersion", func() {
 		defer ginkgo.GinkgoRecover()
 
-		ginkgo.BeforeEach(
-			func() {
-				ginkgo.GinkgoT().Setenv(sdkmPluginGo.EnvSdkmOriginPrefix+sdkmPluginGo.EnvPath, "")
-			},
-		)
-
 		ginkgo.DescribeTable(
 			"success", func(sdkVersion, wantSDKPath, wantGoCachePath string) {
 				var (
-					originPath      = os.Getenv(sdkmPluginGo.EnvPath)
+					originPath      = os.Getenv(itbasisCoreEnv.KeyPath)
 					originPaths     = strings.Split(originPath, string(os.PathListSeparator))
 					countOriginPath = len(originPaths)
 
@@ -41,6 +37,21 @@ var _ = ginkgo.Describe(
 				mockBasePlugin.EXPECT().GetSDKDir().Return(sdkVersionDir).AnyTimes()
 				mockBasePlugin.EXPECT().GetSDKVersionDir(pluginGoConsts.PluginID, sdkVersion).Return(sdkVersionDir).AnyTimes()
 				mockBasePlugin.EXPECT().HasInstalled(pluginGoConsts.PluginID, sdkVersion).Return(true).AnyTimes()
+				mockBasePlugin.EXPECT().
+					PrepareEnvironment(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+					Return(
+						itbasisCoreEnv.Map{
+							itbasisCoreEnv.KeyPath:                                    originPath,
+							itbasisCoreEnv.KeyGoRoot:                                  os.Getenv(itbasisCoreEnv.KeyGoRoot),
+							itbasisCoreEnv.KeyGoPath:                                  os.Getenv(itbasisCoreEnv.KeyGoPath),
+							itbasisCoreEnv.KeyGoBin:                                   os.Getenv(itbasisCoreEnv.KeyGoBin),
+							pluginBase.EnvSdkmOriginPrefix + itbasisCoreEnv.KeyPath:   originPath,
+							pluginBase.EnvSdkmOriginPrefix + itbasisCoreEnv.KeyGoRoot: os.Getenv(itbasisCoreEnv.KeyGoRoot),
+							pluginBase.EnvSdkmOriginPrefix + itbasisCoreEnv.KeyGoPath: os.Getenv(itbasisCoreEnv.KeyGoPath),
+							pluginBase.EnvSdkmOriginPrefix + itbasisCoreEnv.KeyGoBin:  os.Getenv(itbasisCoreEnv.KeyGoBin),
+						},
+					).
+					AnyTimes()
 
 				var pluginGo, errGetPlugin = sdkmPluginGo.GetPlugin(mockBasePlugin)
 				gomega.Expect(errGetPlugin).To(gomega.Succeed())
@@ -52,11 +63,11 @@ var _ = ginkgo.Describe(
 					gomega.SatisfyAll(
 						gomega.HaveLen(8),
 
-						gomega.HaveKeyWithValue(sdkmPluginGo.EnvSdkmOriginPrefix+sdkmPluginGo.EnvPath, originPath),
+						gomega.HaveKeyWithValue(pluginBase.EnvSdkmOriginPrefix+itbasisCoreEnv.KeyPath, originPath),
 					),
 				)
 
-				var actualPaths = strings.Split(envs["PATH"], string(os.PathListSeparator))
+				var actualPaths = strings.Split(envs[itbasisCoreEnv.KeyPath], string(os.PathListSeparator))
 
 				gomega.Expect(originPaths).To(gomega.HaveLen(countOriginPath))
 				gomega.Expect(actualPaths).To(gomega.HaveLen(countOriginPath + 3))

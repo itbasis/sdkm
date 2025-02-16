@@ -48,6 +48,7 @@ func GetPluginByID(cmd *cobra.Command) sdkmPlugin.SDKMPlugin {
 
 func _initBasePlugin(cmd *cobra.Command) sdkmPlugin.BasePlugin {
 	basePlugin, errBasePlugin := pluginBase.NewBasePlugin(
+		cmd.Context(),
 		pluginBase.WithCustomSdkDir(sdkmCmd.GetSdkRootDir(cmd)),
 	)
 	itbasisCoreCmd.RequireNoError(cmd, errBasePlugin)

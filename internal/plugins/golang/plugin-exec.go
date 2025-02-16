@@ -20,7 +20,7 @@ func (receiver *goPlugin) Exec(
 		return errors.Wrapf(plugin.ErrExecuteFailed, "failed get environment: %s", errEnviron.Error())
 	}
 
-	if errExec := receiver.basePlugin.Exec(args[0], environ, stdIn, stdOut, stdErr, args[1:]); errExec != nil {
+	if errExec := receiver.basePlugin.Exec(ctx, args[0], environ, stdIn, stdOut, stdErr, args[1:]); errExec != nil {
 		return errors.Wrapf(plugin.ErrExecuteFailed, "failed exec: %s", errExec.Error())
 	}
 

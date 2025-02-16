@@ -1,6 +1,7 @@
 package base
 
 import (
+	"context"
 	"log/slog"
 
 	itbasisCoreOption "github.com/itbasis/go-tools-core/option"
@@ -24,7 +25,7 @@ type _optionSdkDir struct {
 
 func (r *_optionSdkDir) Key() itbasisCoreOption.Key { return _optionSdkDirKey }
 
-func (r *_optionSdkDir) Apply(cmp *basePlugin) error {
+func (r *_optionSdkDir) Apply(_ context.Context, cmp *basePlugin) error {
 	slog.Debug("apply SDK directory option", sdkmLog.SlogAttrRootDir(r.dir))
 
 	if r.dir != "" {

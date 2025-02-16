@@ -1,31 +1,24 @@
 package base
 
 import (
+	"context"
 	"io"
-	"os"
 
-	itbasisCoreEnv "github.com/itbasis/go-tools-core/env"
 	itbasisCoreExec "github.com/itbasis/go-tools-core/exec"
-	itbasisCoreOs "github.com/itbasis/go-tools-core/os"
 	"github.com/pkg/errors"
 )
 
 func (receiver *basePlugin) Exec(
+	ctx context.Context,
 	cli string,
 	overrideEnv map[string]string,
 	stdIn io.Reader, stdOut, stdErr io.Writer,
 	args []string,
 ) error {
-	var envMap = itbasisCoreEnv.MergeEnvs(os.Environ(), overrideEnv)
-
-	envMap["SDKM_BACKUP_PATH"] = envMap["PATH"]
-	envMap["PATH"] = itbasisCoreOs.CleanPath(envMap["PATH"], itbasisCoreOs.ExecutableDir())
-
-	if err := os.Setenv("PATH", envMap["PATH"]); err != nil {
-		return errors.Wrap(err, "error setting PATH environment variable")
-	}
+	var envMap = receiver.PrepareEnvironment(overrideEnv)
 
 	cmd, err := itbasisCoreExec.NewExecutable(
+		ctx,
 		cli,
 		itbasisCoreExec.WithArgs(args...),
 		itbasisCoreExec.WithCustomIn(stdIn),
@@ -36,7 +29,7 @@ func (receiver *basePlugin) Exec(
 		return errors.Wrap(err, "error executing plugin")
 	}
 
-	if err := cmd.Execute(); err != nil {
+	if err := cmd.Execute(ctx); err != nil {
 		return errors.Wrap(err, itbasisCoreExec.ErrFailedExecuteCommand.Error())
 	}
 

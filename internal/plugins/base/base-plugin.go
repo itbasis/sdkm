@@ -1,6 +1,7 @@
 package base
 
 import (
+	"context"
 	"os"
 	"path"
 
@@ -12,11 +13,14 @@ type basePlugin struct {
 	sdkDir string
 }
 
-func NewBasePlugin(opts ...itbasisCoreOption.Option[basePlugin]) (sdkmPlugin.BasePlugin, error) {
+func NewBasePlugin(ctx context.Context, opts ...itbasisCoreOption.Option[basePlugin]) (sdkmPlugin.BasePlugin, error) {
 	cmp := &basePlugin{}
 
 	if err := itbasisCoreOption.ApplyOptions(
-		cmp, opts, map[itbasisCoreOption.Key]itbasisCoreOption.LazyOptionFunc[basePlugin]{
+		ctx,
+		cmp,
+		opts,
+		map[itbasisCoreOption.Key]itbasisCoreOption.LazyOptionFunc[basePlugin]{
 			_optionSdkDirKey: WithDefaultSdkDir,
 		},
 	); err != nil {
