@@ -1,0 +1,51 @@
+= SDK Manager
+:icons: font
+
+image:https://img.shields.io/github/go-mod/go-version/dev-itbasis-sdkm/sdkm[GitHub go.mod Go version]
+
+== Links
+
+* link:TODO.adoc[TODO]
+
+* link:CHANGELOG.adoc[ChangeLog]
+
+== Install
+
+. Unpack to any directory.
+For example, in `$HOME/.sdkm/` (further this path in the documentation will be referred to as
+`SDKM_HOME`)
+. (Optional) Add the path to `$SDKM_HOME` to `PATH` - if you use hooks, this will be done automatically: `export PATH=${SDKM_HOME}:${PATH}`
+. Unpack scripts for shims: `./sdkm reshim`
+. Enjoy icon:smile-o[]
+
+== Terminal hooks
+
+. ZSH
++
+It is necessary to add the line `source $SDKM_HOME/hook.zsh` to `~/.zshrc`
+
+. Bash
++
+It is necessary to add the line `source $SDKM_HOME/hook.bash` to `~/.bashrc`
+
+== SDK installation location
+
+The `{SDK_ROOT_DIR}/{pluginID}/{sdk-version}` directory is used.
+
+By default `SDK_ROOT_DIR` is "${HOME}/sdk". You can set the path via the `SDKM_SDK_ROOT_DIR` environment variable or via the `--sdk-root-dir` argument on the command line (takes precedence over the environment variable)
+
+== SDK caches
+
+Some SDKs use a separate directory for their caches.
+For example, in Go it is located in `${GOPATH}`.
+By default, the SDKM sets the directory `{CACHE_ROOT_DIR}/{pluginID}/{sdk-version}` for this directory.
+
+By default `CACHE_ROOT_DIR` is "${HOME}/.cache". You can set the path via the `SDKM_CACHE_ROOT_DIR` environment variable or via the `--cache-root-dir` argument on the command line (takes precedence over the environment variable)
+
+== Caching SDK versions
+
+When receiving a list of SDK versions, SDKM caches the received list locally for 1 day to avoid redundant requests to the Internet and improve application responsiveness.
+
+The cache is located in the path `${SDKM_HOME}/.cache/{pluginID}.json`.
+
+It can be forced to update for some commands via the command line argument "--rebuild-cache"
