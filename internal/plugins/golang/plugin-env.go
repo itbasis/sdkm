@@ -27,6 +27,7 @@ func (receiver *goPlugin) EnvByVersion(_ context.Context, version string) (itbas
 	var (
 		goCacheDir = receiver.getGoCacheDir(version)
 		goBin      = path.Join(goCacheDir, "bin")
+		goRootDir  = receiver.basePlugin.GetSDKVersionDir(pluginGoConsts.PluginID, version)
 
 		envs = receiver.basePlugin.PrepareEnvironment(nil, itbasisCoreEnv.KeyGoRoot, itbasisCoreEnv.KeyGoPath, itbasisCoreEnv.KeyGoBin)
 	)
@@ -34,14 +35,16 @@ func (receiver *goPlugin) EnvByVersion(_ context.Context, version string) (itbas
 	slog.Debug("envs", itbasisCoreLog.SlogAttrMap("envs", envs))
 
 	var result = itbasisCoreEnv.Map{
-		itbasisCoreEnv.KeyGoRoot: receiver.basePlugin.GetSDKVersionDir(pluginGoConsts.PluginID, version),
+		itbasisCoreEnv.KeyGoRoot: goRootDir,
 		itbasisCoreEnv.KeyGoPath: goCacheDir,
 		itbasisCoreEnv.KeyGoBin:  goBin,
-		itbasisCoreEnv.KeyPath: itbasisCoreOs.AddBeforePath(
-			envs[itbasisCoreEnv.KeyPath],
-			path.Join(receiver.basePlugin.GetSDKVersionDir(pluginGoConsts.PluginID, version), "bin"),
-			goBin,
-			itbasisCoreOs.ExecutableDir(),
+		itbasisCoreEnv.KeyPath: itbasisCoreOs.FixPath(
+			itbasisCoreOs.AddBeforePath(
+				envs[itbasisCoreEnv.KeyPath],
+				path.Join(goRootDir, "bin"),
+				goBin,
+				itbasisCoreOs.ExecutableDir(),
+			),
 		),
 	}
 

@@ -11,11 +11,11 @@ import (
 
 const _optionSdkDirKey itbasisCoreOption.Key = "option-sdk-dir"
 
-func WithDefaultSdkDir() itbasisCoreOption.Option[basePlugin] {
-	return &_optionSdkDir{}
+func WithDefaultSdkDir() Option {
+	return &_optionSdkDir{dir: sdkmSdk.GetDefaultSdkRoot()}
 }
 
-func WithCustomSdkDir(sdkDir string) itbasisCoreOption.Option[basePlugin] {
+func WithCustomSdkDir(sdkDir string) Option {
 	return &_optionSdkDir{dir: sdkDir}
 }
 
@@ -28,13 +28,7 @@ func (r *_optionSdkDir) Key() itbasisCoreOption.Key { return _optionSdkDirKey }
 func (r *_optionSdkDir) Apply(_ context.Context, cmp *basePlugin) error {
 	slog.Debug("apply SDK directory option", sdkmLog.SlogAttrRootDir(r.dir))
 
-	if r.dir != "" {
-		cmp.sdkDir = r.dir
-
-		return nil
-	}
-
-	cmp.sdkDir = sdkmSdk.GetDefaultSdkRoot()
+	cmp.sdkDir = r.dir
 
 	return nil
 }

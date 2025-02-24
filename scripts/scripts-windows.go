@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"path/filepath"
+	"path"
 
 	"github.com/pkg/errors"
 )
@@ -35,7 +35,7 @@ func Unpack(targetDir string) error {
 		// 	fileMode = 0644
 		// }
 
-		if errWrite := os.WriteFile(filepath.Join(targetDir, entryName), bytes, fileMode); errWrite != nil {
+		if errWrite := os.WriteFile(path.Join(targetDir, entryName), bytes, fileMode); errWrite != nil {
 			errUnpack = goErrors.Join(errUnpack, errWrite)
 		}
 	}

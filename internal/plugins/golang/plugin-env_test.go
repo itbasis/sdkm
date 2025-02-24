@@ -4,7 +4,6 @@ import (
 	"context"
 	"os"
 	"path"
-	"strings"
 
 	itbasisCoreEnv "github.com/itbasis/go-tools-core/env"
 	itbasisCoreOs "github.com/itbasis/go-tools-core/os"
@@ -14,6 +13,7 @@ import (
 	sdkmPlugin "github.com/itbasis/go-tools-sdkm/pkg/plugin"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
+	"github.com/onsi/gomega/gstruct"
 	"go.uber.org/mock/gomock"
 )
 
@@ -25,7 +25,7 @@ var _ = ginkgo.Describe(
 			"success", func(sdkVersion, wantSDKPath, wantGoCachePath string) {
 				var (
 					originPath      = os.Getenv(itbasisCoreEnv.KeyPath)
-					originPaths     = strings.Split(originPath, string(os.PathListSeparator))
+					originPaths     = itbasisCoreOs.SplitPathList(originPath)
 					countOriginPath = len(originPaths)
 
 					mockController = gomock.NewController(ginkgo.GinkgoT())
@@ -67,13 +67,19 @@ var _ = ginkgo.Describe(
 					),
 				)
 
-				var actualPaths = strings.Split(envs[itbasisCoreEnv.KeyPath], string(os.PathListSeparator))
-
 				gomega.Expect(originPaths).To(gomega.HaveLen(countOriginPath))
-				gomega.Expect(actualPaths).To(gomega.HaveLen(countOriginPath + 3))
-				gomega.Expect(actualPaths[0]).To(gomega.Equal(wantSDKPath))
-				gomega.Expect(actualPaths[1]).To(gomega.Equal(wantGoCachePath))
-				gomega.Expect(actualPaths[2]).To(gomega.Equal(itbasisCoreOs.ExecutableDir()))
+				gomega.Expect(itbasisCoreOs.SplitPathList(envs[itbasisCoreEnv.KeyPath])).To(
+					gomega.SatisfyAll(
+						gomega.HaveLen(countOriginPath+3),
+						gstruct.MatchElementsWithIndex(
+							gstruct.IndexIdentity, gstruct.IgnoreExtras, gstruct.Elements{
+								"0": gomega.Equal(wantSDKPath),
+								"1": gomega.Equal(wantGoCachePath),
+								"2": gomega.Equal(itbasisCoreOs.FixPath(itbasisCoreOs.ExecutableDir())),
+							},
+						),
+					),
+				)
 			},
 			ginkgo.Entry(nil, "1.23.0", path.Join("sdk", "1.23.0", "bin"), path.Join("1.23.0", "bin")),
 			ginkgo.Entry(nil, "1.20.1", path.Join("sdk", "1.20.1", "bin"), path.Join("1.20.1", "bin")),

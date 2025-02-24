@@ -42,7 +42,7 @@ func NewDownloader(os, arch, urlReleases string, basePlugin sdkmPlugin.BasePlugi
 
 func (receiver *Downloader) Download(version string) (string, error) {
 	url := receiver.URLForDownload(version)
-	outFilePath := filepath.Join(receiver.basePlugin.GetSDKDir(), ".download", filepath.Base(url))
+	outFilePath := path.Join(receiver.basePlugin.GetSDKDir(), ".download", filepath.Base(url))
 
 	if err := os.MkdirAll(filepath.Dir(outFilePath), itbasisCoreOs.DefaultDirMode); err != nil {
 		return "", errors.Wrapf(sdkmPlugin.ErrDownloadFailed, "fail make directories: %s", err.Error())

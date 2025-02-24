@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"path/filepath"
+	"path"
 )
 
 func Unpack(targetDir string) error {
@@ -33,7 +33,7 @@ func Unpack(targetDir string) error {
 		// 	fileMode = 0644
 		// }
 
-		if errWrite := os.WriteFile(filepath.Join(targetDir, entryName), bytes, fileMode); errWrite != nil {
+		if errWrite := os.WriteFile(path.Join(targetDir, entryName), bytes, fileMode); errWrite != nil {
 			errUnpack = errors.Join(errUnpack, errWrite)
 		}
 	}
