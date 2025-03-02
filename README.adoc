@@ -1,7 +1,8 @@
 = SDK Manager
 :icons: font
 
-image:https://img.shields.io/github/go-mod/go-version/dev-itbasis-sdkm/sdkm[GitHub go.mod Go version]
+image:https://img.shields.io/github/go-mod/go-version/itbasis/sdkm[GitHub go.mod Go version]
+image:https://img.shields.io/github/v/release/itbasis/sdkm[GitHub Release]
 
 == Links
 
@@ -17,6 +18,8 @@ For example, in `$HOME/.sdkm/` (further this path in the documentation will be r
 . (Optional) Add the path to `$SDKM_HOME` to `PATH` - if you use hooks, this will be done automatically: `export PATH=${SDKM_HOME}:${PATH}`
 . Unpack scripts for shims: `./sdkm reshim`
 . Enjoy icon:smile-o[]
+
+Support IDE: link:https://github.com/itbasis/sdkm-vscode[VSCode]
 
 == Terminal hooks
 
