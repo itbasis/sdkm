@@ -13,7 +13,7 @@ require (
 	github.com/spf13/pflag v1.0.6
 	go.uber.org/mock v0.5.0
 	golang.org/x/exp v0.0.0-20250228200357-dead58393ab7
-	golang.org/x/mod v0.23.0
+	golang.org/x/mod v0.24.0
 	golang.org/x/tools v0.30.0
 	golift.io/xtractr v0.2.2
 )
