@@ -13,14 +13,14 @@ import (
 	pluginGoConsts "github.com/itbasis/go-tools-sdkm/internal/plugins/golang/consts"
 )
 
-func (receiver *goPlugin) Env(ctx context.Context, rebuildCache bool, baseDir string) (itbasisCoreEnv.Map, error) {
-	sdkVersion, errCurrent := receiver.Current(ctx, rebuildCache, baseDir)
+func (receiver *goPlugin) Env(ctx context.Context, rebuildCache, onlyInstalled bool, baseDir string) (itbasisCoreEnv.Map, error) {
+	sdkVersion, errCurrent := receiver.Current(ctx, rebuildCache, onlyInstalled, baseDir)
 
 	if errCurrent != nil {
 		return map[string]string{}, errCurrent
 	}
 
-	return receiver.EnvByVersion(ctx, sdkVersion.ID)
+	return receiver.EnvByVersion(ctx, sdkVersion.GetId())
 }
 
 func (receiver *goPlugin) EnvByVersion(_ context.Context, version string) (itbasisCoreEnv.Map, error) {

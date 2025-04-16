@@ -3,31 +3,17 @@ package versions
 import (
 	"context"
 	"log/slog"
+	"sort"
 
 	sdkmSDKVersion "github.com/itbasis/go-tools-sdkm/pkg/sdk-version"
 )
 
-func (receiver *versions) AllVersions(ctx context.Context, rebuildCache bool) ([]sdkmSDKVersion.SDKVersion, error) {
+func (receiver *versions) AllVersions(ctx context.Context, rebuildCache bool) (sdkmSDKVersion.SdkVersionList, error) {
 	if rebuildCache || !receiver.cache.Valid(ctx) {
 		receiver.updateCache(ctx, true, true, true)
 	}
 
-	var filterVersions = func(ctx context.Context) []sdkmSDKVersion.SDKVersion {
-		var sdkVersions []sdkmSDKVersion.SDKVersion
-
-		for _, versionType := range []sdkmSDKVersion.VersionType{sdkmSDKVersion.TypeStable, sdkmSDKVersion.TypeUnstable, sdkmSDKVersion.TypeArchived} {
-			v := receiver.cache.Load(ctx, versionType)
-			if len(v) == 0 {
-				continue
-			}
-
-			sdkVersions = append(sdkVersions, v...)
-		}
-
-		return sdkVersions
-	}
-
-	if result := filterVersions(ctx); len(result) > 0 {
+	if result := receiver.filterCacheVersions(ctx); result.Len() > 0 {
 		return result, nil
 	}
 
@@ -35,5 +21,22 @@ func (receiver *versions) AllVersions(ctx context.Context, rebuildCache bool) ([
 
 	receiver.updateCache(ctx, true, true, true)
 
-	return filterVersions(ctx), nil
+	return receiver.filterCacheVersions(ctx), nil
+}
+
+func (receiver *versions) filterCacheVersions(ctx context.Context) sdkmSDKVersion.SdkVersionList {
+	var sdkVersionList = sdkmSDKVersion.NewSdkVersionList()
+
+	for _, versionType := range []sdkmSDKVersion.VersionType{sdkmSDKVersion.TypeStable, sdkmSDKVersion.TypeUnstable, sdkmSDKVersion.TypeArchived} {
+		v := receiver.cache.Load(ctx, versionType)
+		if len(v) == 0 {
+			continue
+		}
+
+		sdkVersionList.Add(v...)
+	}
+
+	sort.Sort(sdkVersionList)
+
+	return sdkVersionList
 }

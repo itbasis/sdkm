@@ -2,7 +2,7 @@ package golang_test
 
 import (
 	"context"
-	"fmt"
+	"sort"
 
 	sdkmPluginGo "github.com/itbasis/go-tools-sdkm/internal/plugins/golang"
 	pluginGoConsts "github.com/itbasis/go-tools-sdkm/internal/plugins/golang/consts"
@@ -10,29 +10,27 @@ import (
 	sdkmSDKVersion "github.com/itbasis/go-tools-sdkm/pkg/sdk-version"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
-	"github.com/onsi/gomega/gstruct"
 	"go.uber.org/mock/gomock"
 )
 
 var _ = ginkgo.Describe(
-	"Plugin Latest Version", func() {
+	"LatestVersion", func() {
 		defer ginkgo.GinkgoRecover()
 
 		var pluginGo sdkmPlugin.SDKMPlugin
+
+		sort.Sort(testSdkList)
 
 		ginkgo.BeforeEach(
 			func() {
 				mockController := gomock.NewController(ginkgo.GinkgoT())
 
+				sort.Sort(testSdkList)
 				mockSDKVersions := sdkmSDKVersion.NewMockSDKVersions(mockController)
-				mockSDKVersions.EXPECT().LatestVersion(gomock.Any(), false).Return(
-					sdkmSDKVersion.SDKVersion{ID: "1.22.5", Type: sdkmSDKVersion.TypeStable},
-					nil,
-				)
+				mockSDKVersions.EXPECT().AllVersions(gomock.Any(), false).Return(testSdkList, nil)
 
 				mockBasePlugin := sdkmPlugin.NewMockBasePlugin(mockController)
 				mockBasePlugin.EXPECT().GetSDKDir().Return("").AnyTimes()
-				mockBasePlugin.EXPECT().HasInstalled(pluginGoConsts.PluginID, gomock.Any()).Return(false)
 
 				plugin, err := sdkmPluginGo.GetPlugin(mockBasePlugin)
 				gomega.Expect(err).To(gomega.Succeed())
@@ -42,20 +40,12 @@ var _ = ginkgo.Describe(
 		)
 
 		ginkgo.DescribeTable(
-			"LatestVersion", func(wantSDKVersion sdkmSDKVersion.SDKVersion) {
-				gomega.Expect(pluginGo.LatestVersion(context.Background(), false)).
-					To(
-						gomega.HaveValue(
-							gstruct.MatchFields(
-								gstruct.IgnoreExtras, gstruct.Fields{
-									"ID":   gomega.Equal(wantSDKVersion.ID),
-									"Type": gomega.Equal(wantSDKVersion.Type),
-								},
-							),
-						),
-					)
+			"LatestVersion", func(onlyInstalled bool, wantSDKVersion sdkmSDKVersion.SDKVersion) {
+				gomega.Expect(pluginGo.LatestVersion(context.Background(), false, onlyInstalled)).
+					To(gomega.Equal(wantSDKVersion))
 			},
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1.22.5", Type: sdkmSDKVersion.TypeStable}),
+			ginkgo.Entry(nil, true, go1_21_12),
+			ginkgo.Entry(nil, false, go1_22_8),
 		)
 	},
 )
@@ -70,35 +60,18 @@ var _ = ginkgo.Describe(
 			func() {
 				mockController := gomock.NewController(ginkgo.GinkgoT())
 
+				sort.Sort(testSdkList)
 				mockSDKVersions := sdkmSDKVersion.NewMockSDKVersions(mockController)
-				mockSDKVersions.EXPECT().
-					LatestVersion(gomock.Any(), false).
-					Return(
-						sdkmSDKVersion.SDKVersion{ID: "1.22.5", Type: sdkmSDKVersion.TypeStable},
-						nil,
-					).
-					MaxTimes(1)
-				mockSDKVersions.EXPECT().
-					AllVersions(gomock.Any(), false).
-					Return(
-						[]sdkmSDKVersion.SDKVersion{
-							{ID: "1.22.5", Type: sdkmSDKVersion.TypeStable},
-							{ID: "1.21.12", Type: sdkmSDKVersion.TypeStable},
-							{ID: "1.23rc2", Type: sdkmSDKVersion.TypeUnstable},
-							{ID: "1.23rc1", Type: sdkmSDKVersion.TypeArchived},
-							{ID: "1.22.4", Type: sdkmSDKVersion.TypeArchived},
-							{ID: "1.22.3", Type: sdkmSDKVersion.TypeArchived},
-							{ID: "1.21.11", Type: sdkmSDKVersion.TypeArchived},
-							{ID: "1.20.14", Type: sdkmSDKVersion.TypeArchived},
-							{ID: "1.19.13", Type: sdkmSDKVersion.TypeArchived},
-							{ID: "1.19.12", Type: sdkmSDKVersion.TypeArchived},
-						},
-						nil,
-					).MaxTimes(1)
+				mockSDKVersions.EXPECT().AllVersions(gomock.Any(), false).Return(testSdkList, nil).MaxTimes(1)
 
 				mockBasePlugin := sdkmPlugin.NewMockBasePlugin(mockController)
 				mockBasePlugin.EXPECT().GetSDKDir().Return("").AnyTimes()
-				mockBasePlugin.EXPECT().HasInstalled(pluginGoConsts.PluginID, gomock.Any()).Return(false).AnyTimes()
+				mockBasePlugin.EXPECT().HasInstalled(pluginGoConsts.PluginID, gomock.Any()).DoAndReturn(func(_ sdkmPlugin.ID, version string) bool {
+					v, ok := sdkMap[version]
+					gomega.Expect(ok).To(gomega.BeTrue())
+
+					return v.HasInstalled()
+				}).AnyTimes()
 
 				plugin, err := sdkmPluginGo.GetPlugin(mockBasePlugin)
 				gomega.Expect(err).To(gomega.Succeed())
@@ -107,34 +80,37 @@ var _ = ginkgo.Describe(
 		)
 
 		ginkgo.DescribeTable(
-			"success", func(prefix string, wantSDKVersion sdkmSDKVersion.SDKVersion) {
-				gomega.Expect(pluginGo.LatestVersionByPrefix(context.Background(), false, prefix)).
-					To(
-						gomega.HaveValue(
-							gstruct.MatchFields(
-								gstruct.IgnoreExtras, gstruct.Fields{
-									"ID":   gomega.Equal(wantSDKVersion.ID),
-									"Type": gomega.Equal(wantSDKVersion.Type),
-								},
-							),
-						),
-					)
+			"success", func(prefix string, onlyInstalled bool, wantSDKVersion sdkmSDKVersion.SDKVersion) {
+				gomega.Expect(pluginGo.LatestVersionByPrefix(context.Background(), false, onlyInstalled, prefix)).
+					To(gomega.Equal(wantSDKVersion))
 			},
-			ginkgo.Entry("empty prefix", "", sdkmSDKVersion.SDKVersion{ID: "1.22.5", Type: sdkmSDKVersion.TypeStable}),
-			ginkgo.Entry(nil, "1.23", sdkmSDKVersion.SDKVersion{ID: "1.23rc2", Type: sdkmSDKVersion.TypeUnstable}),
-			ginkgo.Entry(nil, "1.22", sdkmSDKVersion.SDKVersion{ID: "1.22.5", Type: sdkmSDKVersion.TypeStable}),
-			ginkgo.Entry(nil, "1.21", sdkmSDKVersion.SDKVersion{ID: "1.21.12", Type: sdkmSDKVersion.TypeStable}),
-			ginkgo.Entry(nil, "1.20", sdkmSDKVersion.SDKVersion{ID: "1.20.14", Type: sdkmSDKVersion.TypeArchived}),
-			ginkgo.Entry(nil, "1.19", sdkmSDKVersion.SDKVersion{ID: "1.19.13", Type: sdkmSDKVersion.TypeArchived}),
+			ginkgo.Entry("empty prefix", "", true, go1_21_12),
+			ginkgo.Entry("empty prefix", "", false, go1_22_8),
+			ginkgo.Entry(nil, "1.23", true, go1_23_rc1),
+			ginkgo.Entry(nil, "1.23", false, go1_23_rc2),
+			ginkgo.Entry(nil, "1.22", true, go1_22_5),
+			ginkgo.Entry(nil, "1.22", false, go1_22_8),
+			ginkgo.Entry(nil, "1.21", true, go1_21_12),
+			ginkgo.Entry(nil, "1.21", false, go1_21_12),
+			ginkgo.Entry(nil, "1.20", false, go1_20_14),
+			ginkgo.Entry(nil, "1.19", true, go1_19_13),
+			ginkgo.Entry(nil, "1.19", false, go1_19_13),
 		)
 
 		ginkgo.DescribeTable(
-			"fail", func(prefix string) {
-				gomega.Expect(pluginGo.LatestVersionByPrefix(context.Background(), false, prefix)).Error().To(
-					gomega.MatchError(fmt.Sprintf("version by prefix %s: SDK version not found", prefix)),
+
+			"fail", func(prefix string, onlyInstalled bool, wantErr string) {
+				gomega.Expect(pluginGo.LatestVersionByPrefix(context.Background(), false, onlyInstalled, prefix)).
+					Error().To(
+					gomega.MatchError(
+						sdkmSDKVersion.ErrSDKVersionNotFound,
+						gomega.ContainSubstring(wantErr),
+					),
 				)
 			},
-			ginkgo.Entry("", "1.24"),
+			ginkgo.Entry("", "1.24", true, "version by prefix 1.24"),
+			ginkgo.Entry("", "1.24", false, "version by prefix 1.24"),
+			ginkgo.Entry("", "1.20", true, "version by prefix 1.20"),
 		)
 	},
 )

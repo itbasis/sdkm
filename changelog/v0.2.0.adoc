@@ -1,0 +1,6 @@
+= v0.2.0
+:icons: font
+
+[no-bullet]
+- icon:wrench[] Fix link:https://github.com/itbasis/sdkm/issues/17[#17]
+- icon:plus[] Added command line argument `--with-uninstalled` - indicates that the SDK version should be calculated not only by those installed in the system, but also by those available for installation

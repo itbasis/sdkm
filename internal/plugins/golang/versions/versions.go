@@ -106,13 +106,13 @@ func (receiver *versions) parseVersions(
 	slog.Debug(fmt.Sprintf("found groups for version type: %s", versionType))
 
 	var (
-		submatch    = receiver.reGoVersion.FindAllStringSubmatch(content, -1)
-		sdkVersions = make([]sdkmSDKVersion.SDKVersion, len(submatch))
+		m           = receiver.reGoVersion.FindAllStringSubmatch(content, -1)
+		sdkVersions = make([]sdkmSDKVersion.SDKVersion, len(m))
 	)
 
-	for i, row := range submatch {
+	for i, row := range m {
 		if row[1] != "" {
-			sdkVersion := sdkmSDKVersion.SDKVersion{ID: row[1], Type: versionType}
+			sdkVersion := sdkmSDKVersion.NewSDKVersion(row[1], versionType, false)
 
 			sdkVersions[i] = sdkVersion
 		}

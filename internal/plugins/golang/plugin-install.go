@@ -11,18 +11,18 @@ import (
 )
 
 func (receiver *goPlugin) Install(ctx context.Context, rebuildCache bool, baseDir string) error {
-	sdkVersion, errCurrent := receiver.Current(ctx, rebuildCache, baseDir)
+	sdkVersion, errCurrent := receiver.Current(ctx, rebuildCache, true, baseDir)
 	if errCurrent != nil {
-		return errors.Wrapf(plugin.ErrSDKInstall, "failed get current version: %s", errCurrent.Error())
+		return errors.WithMessagef(plugin.ErrSDKInstall, "failed get current version: %s", errCurrent.Error())
 	}
 
-	if sdkVersion.Installed {
-		slog.Info(fmt.Sprintf("SDK already installed: %s", sdkVersion.ID))
+	if sdkVersion.HasInstalled() {
+		slog.Info(fmt.Sprintf("SDK already installed: %s", sdkVersion.GetId()))
 
 		return nil
 	}
 
-	return receiver.InstallVersion(ctx, sdkVersion.ID)
+	return receiver.InstallVersion(ctx, sdkVersion.GetId())
 }
 
 func (receiver *goPlugin) InstallVersion(_ context.Context, version string) error {

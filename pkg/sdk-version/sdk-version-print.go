@@ -11,11 +11,11 @@ type PrintFormatOptions struct {
 	OutputNotInstalled bool
 }
 
-func (receiver *SDKVersion) Print() string {
-	return receiver.PrintWithOptions(true, true, false)
+func (receiver *_sdkVersion) Print() string {
+	return receiver.PrintWithOptions(true, false, true)
 }
 
-func (receiver *SDKVersion) PrintWithOptions(outType, outInstalled, outNotInstalled bool) string {
+func (receiver *_sdkVersion) PrintWithOptions(outType, outInstalled, outNotInstalled bool) string {
 	if receiver == nil || receiver.ID == "" {
 		return ""
 	}
@@ -26,9 +26,9 @@ func (receiver *SDKVersion) PrintWithOptions(outType, outInstalled, outNotInstal
 		out += _sprintType(receiver.Type)
 	}
 
-	if outInstalled && receiver.Installed {
+	if outInstalled && receiver.installed {
 		out += " [installed]"
-	} else if outNotInstalled && !receiver.Installed {
+	} else if outNotInstalled && !receiver.installed {
 		out += " [not installed]"
 	}
 

@@ -44,15 +44,14 @@ func (receiver *goPlugin) WithVersions(versions sdkmSDKVersion.SDKVersions) sdkm
 	return receiver
 }
 
-func (receiver *goPlugin) enrichSDKVersion(sdkVersion *sdkmSDKVersion.SDKVersion) {
+func (receiver *goPlugin) getGoCacheDir(version string) string {
+	return path.Join(receiver.goCacheRootDir, version)
+}
+
+func (receiver *goPlugin) enrichSDKVersion(sdkVersion sdkmSDKVersion.SDKVersion) {
 	if sdkVersion == nil {
 		return
 	}
 
-	sdkVersion.Installed = sdkVersion.Installed ||
-		receiver.basePlugin.HasInstalled(pluginGoConsts.PluginID, sdkVersion.ID)
-}
-
-func (receiver *goPlugin) getGoCacheDir(version string) string {
-	return path.Join(receiver.goCacheRootDir, version)
+	sdkVersion.SetInstalled(sdkVersion.HasInstalled() || receiver.basePlugin.HasInstalled(pluginGoConsts.PluginID, sdkVersion.GetId()))
 }

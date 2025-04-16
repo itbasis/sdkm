@@ -11,6 +11,5 @@ type SDKVersions interface {
 
 	WithCache(cache Cache) SDKVersions
 
-	AllVersions(ctx context.Context, rebuildCache bool) ([]SDKVersion, error)
-	LatestVersion(ctx context.Context, rebuildCache bool) (SDKVersion, error)
+	AllVersions(ctx context.Context, rebuildCache bool) (SdkVersionList, error)
 }

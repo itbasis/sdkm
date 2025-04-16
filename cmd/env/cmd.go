@@ -23,7 +23,7 @@ func NewEnvCommand() *cobra.Command {
 		cmd, func(cmdChild *cobra.Command) {
 			cmdChild.Use = itbasisCoreCmd.BuildUse(cmdChild.Use, sdkmCmd.UseArgVersion)
 			cmdChild.ArgAliases = []string{sdkmCmd.ArgAliasVersion}
-			cmdChild.Args = cobra.MatchAll(cobra.MaximumNArgs(1), cobra.OnlyValidArgs)
+			cmdChild.Args = cobra.MatchAll(cobra.MaximumNArgs(2), cobra.OnlyValidArgs)
 			cmdChild.Run = _run
 		},
 	)
@@ -39,7 +39,12 @@ func _run(cmd *cobra.Command, args []string) {
 	)
 
 	if len(args) == 0 {
-		envMap, err = sdkmPlugin.Env(cmd.Context(), sdkmCmd.IsFlagRebuildCache(cmd), itbasisCoreOs.Pwd())
+		envMap, err = sdkmPlugin.Env(
+			cmd.Context(),
+			sdkmCmd.IsFlagRebuildCache(cmd),
+			!sdkmCmd.IsFlagWithUninstalled(cmd),
+			itbasisCoreOs.Pwd(),
+		)
 	} else {
 		envMap, err = sdkmPlugin.EnvByVersion(cmd.Context(), args[_idxArgVersion])
 	}

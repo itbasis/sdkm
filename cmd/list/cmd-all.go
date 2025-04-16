@@ -32,24 +32,24 @@ func newListAllCommand() *cobra.Command {
 
 func _run(cmd *cobra.Command, args []string) {
 	var (
-		plugin      = sdkmPlugins.GetPluginByID(cmd)
-		sdkVersions []sdkmSDKVersion.SDKVersion
-		err         error
+		plugin         = sdkmPlugins.GetPluginByID(cmd)
+		sdkVersionList sdkmSDKVersion.SdkVersionList
+		err            error
 	)
 
 	var flagRebuildCache = sdkmCmd.IsFlagRebuildCache(cmd)
 
 	if len(args) == 0 {
-		sdkVersions, err = plugin.ListAllVersions(cmd.Context(), flagRebuildCache)
+		sdkVersionList, err = plugin.ListAllVersions(cmd.Context(), flagRebuildCache)
 	} else {
-		sdkVersions, err = plugin.ListAllVersionsByPrefix(cmd.Context(), flagRebuildCache, args[_idxArgVersion])
+		sdkVersionList, err = plugin.ListAllVersionsByPrefix(cmd.Context(), flagRebuildCache, args[_idxArgVersion])
 	}
 
 	if err != nil {
 		itbasisCoreCmd.Fatal(cmd, err)
 	}
 
-	for _, sdkVersion := range sdkVersions {
+	for sdkVersion := range sdkVersionList.Seq() {
 		// TODO code smell
 		cmd.Println(sdkVersion)
 	}

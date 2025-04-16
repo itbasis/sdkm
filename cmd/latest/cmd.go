@@ -32,17 +32,18 @@ func NewLatestCommand() *cobra.Command {
 
 func _run(cmd *cobra.Command, args []string) {
 	var (
-		sdkmPlugin       = sdkmPlugins.GetPluginByID(cmd)
-		flagRebuildCache = sdkmCmd.IsFlagRebuildCache(cmd)
+		sdkmPlugin        = sdkmPlugins.GetPluginByID(cmd)
+		flagRebuildCache  = sdkmCmd.IsFlagRebuildCache(cmd)
+		flagOnlyInstalled = !sdkmCmd.IsFlagWithUninstalled(cmd)
 
 		sdkVersion sdkmSDKVersion.SDKVersion
 		err        error
 	)
 
 	if len(args) == 0 {
-		sdkVersion, err = sdkmPlugin.LatestVersion(cmd.Context(), flagRebuildCache)
+		sdkVersion, err = sdkmPlugin.LatestVersion(cmd.Context(), flagRebuildCache, flagOnlyInstalled)
 	} else {
-		sdkVersion, err = sdkmPlugin.LatestVersionByPrefix(cmd.Context(), flagRebuildCache, args[_idxArgVersion])
+		sdkVersion, err = sdkmPlugin.LatestVersionByPrefix(cmd.Context(), flagRebuildCache, flagOnlyInstalled, args[_idxArgVersion])
 	}
 
 	if err != nil {

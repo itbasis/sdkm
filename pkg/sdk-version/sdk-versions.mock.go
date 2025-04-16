@@ -41,10 +41,10 @@ func (m *MockSDKVersions) EXPECT() *MockSDKVersionsMockRecorder {
 }
 
 // AllVersions mocks base method.
-func (m *MockSDKVersions) AllVersions(ctx context.Context, rebuildCache bool) ([]SDKVersion, error) {
+func (m *MockSDKVersions) AllVersions(ctx context.Context, rebuildCache bool) (SdkVersionList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AllVersions", ctx, rebuildCache)
-	ret0, _ := ret[0].([]SDKVersion)
+	ret0, _ := ret[0].(SdkVersionList)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -67,21 +67,6 @@ func (m *MockSDKVersions) GoString() string {
 func (mr *MockSDKVersionsMockRecorder) GoString() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GoString", reflect.TypeOf((*MockSDKVersions)(nil).GoString))
-}
-
-// LatestVersion mocks base method.
-func (m *MockSDKVersions) LatestVersion(ctx context.Context, rebuildCache bool) (SDKVersion, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "LatestVersion", ctx, rebuildCache)
-	ret0, _ := ret[0].(SDKVersion)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// LatestVersion indicates an expected call of LatestVersion.
-func (mr *MockSDKVersionsMockRecorder) LatestVersion(ctx, rebuildCache any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LatestVersion", reflect.TypeOf((*MockSDKVersions)(nil).LatestVersion), ctx, rebuildCache)
 }
 
 // WithCache mocks base method.

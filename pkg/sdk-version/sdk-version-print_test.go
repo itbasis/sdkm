@@ -12,32 +12,21 @@ var _ = ginkgo.Describe(
 			"Strange models, but need to check", func(model sdkmSDKVersion.SDKVersion, expected string) {
 				gomega.Expect(model.Print()).To(gomega.Equal(expected))
 			},
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{}, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1"}, "1"),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{Type: sdkmSDKVersion.TypeStable}, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{Type: sdkmSDKVersion.TypeUnstable}, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{Type: sdkmSDKVersion.TypeArchived}, ""),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("", sdkmSDKVersion.TypeStable, false), ""),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("", sdkmSDKVersion.TypeUnstable, false), ""),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("", sdkmSDKVersion.TypeArchived, false), ""),
 		)
 
 		ginkgo.DescribeTable(
 			"correct models", func(model sdkmSDKVersion.SDKVersion, expected string) {
 				gomega.Expect(model.Print()).To(gomega.Equal(expected))
 			},
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{}, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1", Type: sdkmSDKVersion.TypeStable}, "1"),
-			ginkgo.Entry(
-				nil, sdkmSDKVersion.SDKVersion{ID: "1", Type: sdkmSDKVersion.TypeStable, Installed: true}, "1 [installed]",
-			),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1", Type: sdkmSDKVersion.TypeUnstable}, "1 (unstable)"),
-			ginkgo.Entry(
-				nil, sdkmSDKVersion.SDKVersion{ID: "1", Type: sdkmSDKVersion.TypeUnstable, Installed: true},
-				"1 (unstable) [installed]",
-			),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1", Type: sdkmSDKVersion.TypeArchived}, "1 (archived)"),
-			ginkgo.Entry(
-				nil, sdkmSDKVersion.SDKVersion{ID: "1", Type: sdkmSDKVersion.TypeArchived, Installed: true},
-				"1 (archived) [installed]",
-			),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("1.2", sdkmSDKVersion.TypeStable, false), "1.2 [not installed]"),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("1.2", sdkmSDKVersion.TypeStable, true), "1.2"),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("1.2", sdkmSDKVersion.TypeUnstable, false), "1.2 (unstable) [not installed]"),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("1.2", sdkmSDKVersion.TypeUnstable, true), "1.2 (unstable)"),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("1.2", sdkmSDKVersion.TypeArchived, false), "1.2 (archived) [not installed]"),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("1.2", sdkmSDKVersion.TypeArchived, true), "1.2 (archived)"),
 		)
 	},
 )
@@ -49,40 +38,27 @@ var _ = ginkgo.Describe(
 			func(model sdkmSDKVersion.SDKVersion, outType, outInstalled, outNotInstalled bool, expected string) {
 				gomega.Expect(model.PrintWithOptions(outType, outInstalled, outNotInstalled)).To(gomega.Equal(expected))
 			},
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{}, false, false, false, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{}, false, true, false, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{}, false, true, true, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{}, true, false, false, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{}, true, true, false, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{}, true, true, true, ""),
 
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1"}, false, false, false, "1"),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1"}, false, true, false, "1"),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1"}, false, true, true, "1 [not installed]"),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1"}, true, false, false, "1"),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1"}, true, true, false, "1"),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1"}, true, true, true, "1 [not installed]"),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("", sdkmSDKVersion.TypeStable, false), false, false, false, ""),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("", sdkmSDKVersion.TypeStable, false), false, true, false, ""),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("", sdkmSDKVersion.TypeStable, false), false, true, true, ""),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("", sdkmSDKVersion.TypeStable, false), true, false, false, ""),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("", sdkmSDKVersion.TypeStable, false), true, true, false, ""),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("", sdkmSDKVersion.TypeStable, false), true, true, true, ""),
 
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{Type: sdkmSDKVersion.TypeStable}, false, false, false, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{Type: sdkmSDKVersion.TypeStable}, false, true, false, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{Type: sdkmSDKVersion.TypeStable}, false, true, true, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{Type: sdkmSDKVersion.TypeStable}, true, false, false, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{Type: sdkmSDKVersion.TypeStable}, true, true, false, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{Type: sdkmSDKVersion.TypeStable}, true, true, true, ""),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("", sdkmSDKVersion.TypeUnstable, false), false, false, false, ""),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("", sdkmSDKVersion.TypeUnstable, false), false, true, false, ""),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("", sdkmSDKVersion.TypeUnstable, false), false, true, true, ""),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("", sdkmSDKVersion.TypeUnstable, false), true, false, false, ""),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("", sdkmSDKVersion.TypeUnstable, false), true, true, false, ""),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("", sdkmSDKVersion.TypeUnstable, false), true, true, true, ""),
 
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{Type: sdkmSDKVersion.TypeUnstable}, false, false, false, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{Type: sdkmSDKVersion.TypeUnstable}, false, true, false, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{Type: sdkmSDKVersion.TypeUnstable}, false, true, true, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{Type: sdkmSDKVersion.TypeUnstable}, true, false, false, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{Type: sdkmSDKVersion.TypeUnstable}, true, true, false, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{Type: sdkmSDKVersion.TypeUnstable}, true, true, true, ""),
-
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{Type: sdkmSDKVersion.TypeArchived}, false, false, false, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{Type: sdkmSDKVersion.TypeArchived}, false, true, false, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{Type: sdkmSDKVersion.TypeArchived}, false, true, true, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{Type: sdkmSDKVersion.TypeArchived}, true, false, false, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{Type: sdkmSDKVersion.TypeArchived}, true, true, false, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{Type: sdkmSDKVersion.TypeArchived}, true, true, true, ""),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("", sdkmSDKVersion.TypeArchived, false), false, false, false, ""),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("", sdkmSDKVersion.TypeArchived, false), false, true, false, ""),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("", sdkmSDKVersion.TypeArchived, false), false, true, true, ""),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("", sdkmSDKVersion.TypeArchived, false), true, false, false, ""),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("", sdkmSDKVersion.TypeArchived, false), true, true, false, ""),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("", sdkmSDKVersion.TypeArchived, false), true, true, true, ""),
 		)
 
 		ginkgo.DescribeTable(
@@ -90,33 +66,20 @@ var _ = ginkgo.Describe(
 			func(model sdkmSDKVersion.SDKVersion, outType, outInstalled, outNotInstalled bool, expected string) {
 				gomega.Expect(model.PrintWithOptions(outType, outInstalled, outNotInstalled)).To(gomega.Equal(expected))
 			},
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{}, false, false, false, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{}, false, true, false, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{}, false, true, true, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{}, true, false, false, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{}, true, true, false, ""),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{}, true, true, true, ""),
 
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1", Type: sdkmSDKVersion.TypeStable}, false, false, false, "1"),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1", Type: sdkmSDKVersion.TypeStable}, false, true, false, "1"),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1", Type: sdkmSDKVersion.TypeStable}, false, true, true, "1 [not installed]"),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1", Type: sdkmSDKVersion.TypeStable}, true, false, false, "1"),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1", Type: sdkmSDKVersion.TypeStable}, true, true, false, "1"),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1", Type: sdkmSDKVersion.TypeStable}, true, true, true, "1 [not installed]"),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("1.2", sdkmSDKVersion.TypeStable, false), false, false, false, "1.2"),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("1.2", sdkmSDKVersion.TypeStable, false), false, true, false, "1.2"),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("1.2", sdkmSDKVersion.TypeStable, false), false, true, true, "1.2 [not installed]"),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("1.2", sdkmSDKVersion.TypeStable, false), true, false, false, "1.2"),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("1.2", sdkmSDKVersion.TypeStable, false), true, true, false, "1.2"),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("1.2", sdkmSDKVersion.TypeStable, false), true, true, true, "1.2 [not installed]"),
 
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1", Type: sdkmSDKVersion.TypeUnstable}, false, false, false, "1"),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1", Type: sdkmSDKVersion.TypeUnstable}, false, true, false, "1"),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1", Type: sdkmSDKVersion.TypeUnstable}, false, true, true, "1 [not installed]"),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1", Type: sdkmSDKVersion.TypeUnstable}, true, false, false, "1 (unstable)"),
-			ginkgo.Entry(nil, sdkmSDKVersion.SDKVersion{ID: "1", Type: sdkmSDKVersion.TypeUnstable}, true, true, false, "1 (unstable)"),
-			ginkgo.Entry(
-				nil,
-				sdkmSDKVersion.SDKVersion{ID: "1", Type: sdkmSDKVersion.TypeUnstable},
-				true,
-				true,
-				true,
-				"1 (unstable) [not installed]",
-			),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("1.2", sdkmSDKVersion.TypeUnstable, false), false, false, false, "1.2"),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("1.2", sdkmSDKVersion.TypeUnstable, false), false, true, false, "1.2"),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("1.2", sdkmSDKVersion.TypeUnstable, false), false, true, true, "1.2 [not installed]"),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("1.2", sdkmSDKVersion.TypeUnstable, false), true, false, false, "1.2 (unstable)"),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("1.2", sdkmSDKVersion.TypeUnstable, false), true, true, false, "1.2 (unstable)"),
+			ginkgo.Entry(nil, sdkmSDKVersion.NewSDKVersion("1.2", sdkmSDKVersion.TypeUnstable, false), true, true, true, "1.2 (unstable) [not installed]"),
 		)
 	},
 )
