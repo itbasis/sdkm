@@ -9,6 +9,8 @@ import (
 )
 
 func (receiver *versions) AllVersions(ctx context.Context, rebuildCache bool) (sdkmSDKVersion.SdkVersionList, error) {
+	slog.Debug("get all versions", slog.Bool("rebuildCache", rebuildCache))
+
 	if rebuildCache || !receiver.cache.Valid(ctx) {
 		receiver.updateCache(ctx, true, true, true)
 	}
@@ -29,11 +31,11 @@ func (receiver *versions) filterCacheVersions(ctx context.Context) sdkmSDKVersio
 
 	for _, versionType := range []sdkmSDKVersion.VersionType{sdkmSDKVersion.TypeStable, sdkmSDKVersion.TypeUnstable, sdkmSDKVersion.TypeArchived} {
 		v := receiver.cache.Load(ctx, versionType)
-		if len(v) == 0 {
+		if v.IsEmpty() {
 			continue
 		}
 
-		sdkVersionList.Add(v...)
+		sdkVersionList.Add(v.AsList()...)
 	}
 
 	sort.Sort(sdkVersionList)

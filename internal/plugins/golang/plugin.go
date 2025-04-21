@@ -48,7 +48,7 @@ func (receiver *goPlugin) getGoCacheDir(version string) string {
 	return path.Join(receiver.goCacheRootDir, version)
 }
 
-func (receiver *goPlugin) enrichSDKVersion(sdkVersion sdkmSDKVersion.SDKVersion) {
+func (receiver *goPlugin) enrichSDKVersion(sdkVersion *sdkmSDKVersion.SDKVersion) {
 	if sdkVersion == nil {
 		return
 	}

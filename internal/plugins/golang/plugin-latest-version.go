@@ -11,11 +11,14 @@ import (
 )
 
 func (receiver *goPlugin) LatestVersion(ctx context.Context, rebuildCache, onlyInstalled bool) (sdkmSDKVersion.SDKVersion, error) {
-	slog.Debug(fmt.Sprintf("searching for latest version [onlyInstalled=%t]", onlyInstalled))
+	slog.Debug("searching for latest version",
+		slog.Bool("onlyInstalled", onlyInstalled),
+		slog.Bool("rebuildCache", rebuildCache),
+	)
 
 	sdkVersionList, err := receiver.sdkVersions.AllVersions(ctx, rebuildCache)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // TODO
+		return sdkmSDKVersion.EmptySdkVersion, err //nolint:wrapcheck // TODO
 	}
 
 	if !onlyInstalled {
@@ -25,6 +28,8 @@ func (receiver *goPlugin) LatestVersion(ctx context.Context, rebuildCache, onlyI
 	}
 
 	for sdkVersion := range sdkVersionList.Seq() {
+		receiver.enrichSDKVersion(&sdkVersion)
+
 		slog.Debug(fmt.Sprintf("check SDK [%s]: %t", sdkVersion.GetId(), sdkVersion.HasInstalled()))
 
 		if sdkVersion.HasInstalled() {
@@ -34,7 +39,7 @@ func (receiver *goPlugin) LatestVersion(ctx context.Context, rebuildCache, onlyI
 		}
 	}
 
-	return nil, sdkmSDKVersion.ErrSDKVersionNotFound
+	return sdkmSDKVersion.EmptySdkVersion, sdkmSDKVersion.ErrSDKVersionNotFound
 }
 
 func (receiver *goPlugin) LatestVersionByPrefix(ctx context.Context, rebuildCache, onlyInstalled bool, prefix string) (sdkmSDKVersion.SDKVersion, error) {
@@ -46,14 +51,16 @@ func (receiver *goPlugin) LatestVersionByPrefix(ctx context.Context, rebuildCach
 
 	sdkVersionList, err := receiver.ListAllVersions(ctx, rebuildCache)
 	if err != nil {
-		return nil, errors.WithMessage(sdkmSDKVersion.ErrSDKVersionNotFound, err.Error())
+		return sdkmSDKVersion.EmptySdkVersion, errors.WithMessage(sdkmSDKVersion.ErrSDKVersionNotFound, err.Error())
 	}
 
 	for sdkVersion := range sdkVersionList.Seq() {
+		receiver.enrichSDKVersion(&sdkVersion)
+
 		if strings.HasPrefix(sdkVersion.GetId(), prefix) && (!onlyInstalled || sdkVersion.HasInstalled()) {
 			return sdkVersion, nil
 		}
 	}
 
-	return nil, errors.WithMessagef(sdkmSDKVersion.ErrSDKVersionNotFound, "version by prefix %s", prefix)
+	return sdkmSDKVersion.EmptySdkVersion, errors.WithMessagef(sdkmSDKVersion.ErrSDKVersionNotFound, "version by prefix %s", prefix)
 }

@@ -14,10 +14,6 @@ func (receiver *goPlugin) ListAllVersions(ctx context.Context, rebuildCache bool
 		return nil, err //nolint:wrapcheck // TODO  c
 	}
 
-	for sdkVersion := range sdkList.Seq() {
-		receiver.enrichSDKVersion(sdkVersion)
-	}
-
 	sort.Sort(sdkList)
 
 	return sdkList, nil

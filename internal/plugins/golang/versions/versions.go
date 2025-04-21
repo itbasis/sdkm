@@ -120,7 +120,7 @@ func (receiver *versions) parseVersions(
 
 	slog.Debug(fmt.Sprintf("found %d SDK versions for version type: %s", len(sdkVersions), versionType))
 
-	receiver.cache.Store(ctx, versionType, sdkVersions)
+	receiver.cache.Store(ctx, versionType, sdkmSDKVersion.NewSdkVersionList(sdkVersions...))
 }
 
 func (receiver *versions) cleanContent() {

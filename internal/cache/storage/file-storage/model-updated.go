@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-const updatedFormat = time.DateOnly
+const UpdatedFormat = time.DateTime
 
 type updated time.Time
 
@@ -14,7 +14,7 @@ type updated time.Time
 func (receiver *updated) UnmarshalJSON(data []byte) error {
 	s := strings.Trim(string(data), `"`)
 
-	t, err := time.Parse(updatedFormat, s)
+	t, err := time.Parse(UpdatedFormat, s)
 	if err != nil {
 		return err //nolint:wrapcheck // TODO
 	}
@@ -33,5 +33,5 @@ func (receiver updated) MarshalJSON() ([]byte, error) {
 func (receiver updated) String() string {
 	t := time.Time(receiver)
 
-	return t.Format(updatedFormat)
+	return t.Format(UpdatedFormat)
 }

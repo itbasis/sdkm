@@ -3,6 +3,8 @@
 
 include::changelog/dev-version.adoc[]
 
+include::changelog/v0.2.1.adoc[]
+
 include::changelog/v0.2.0.adoc[]
 
 include::changelog/v0.1.0.adoc[]

@@ -3,9 +3,10 @@ module github.com/itbasis/go-tools-sdkm
 go 1.24.2
 
 require (
-	github.com/itbasis/go-clock/v2 v2.1.0
+	github.com/Masterminds/semver/v3 v3.3.1
 	github.com/itbasis/go-test-utils/v5 v5.0.2
 	github.com/itbasis/go-tools-core v0.1.0
+	github.com/jonboulle/clockwork v0.5.0
 	github.com/onsi/ginkgo/v2 v2.23.4
 	github.com/onsi/gomega v1.37.0
 	github.com/pkg/errors v0.9.1
@@ -19,7 +20,6 @@ require (
 )
 
 require (
-	github.com/Masterminds/semver/v3 v3.3.1
 	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/bodgit/plumbing v1.3.0 // indirect
 	github.com/bodgit/sevenzip v1.6.0 // indirect
@@ -29,7 +29,7 @@ require (
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/pprof v0.0.0-20250403155104-27863c87afa6 // indirect
+	github.com/google/pprof v0.0.0-20250418163039-24c5476c6587 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect

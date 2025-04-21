@@ -1,0 +1,17 @@
+{
+	"updated": "2025-04-17 00:00:01",
+	"versions": {
+		"archived": [
+			{
+				"id": "1.22.5",
+				"type": "archived"
+			}
+		],
+		"stable": [
+			{
+				"id": "1.22.8",
+				"type": "stable"
+			}
+		]
+	}
+}

@@ -55,11 +55,12 @@ func (mr *MockCacheStorageMockRecorder) GoString() *gomock.Call {
 }
 
 // Load mocks base method.
-func (m *MockCacheStorage) Load(ctx context.Context) map[VersionType][]SDKVersion {
+func (m *MockCacheStorage) Load(ctx context.Context) (MapSdkVersionGroupType, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Load", ctx)
-	ret0, _ := ret[0].(map[VersionType][]SDKVersion)
-	return ret0
+	ret0, _ := ret[0].(MapSdkVersionGroupType)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Load indicates an expected call of Load.
@@ -69,7 +70,7 @@ func (mr *MockCacheStorageMockRecorder) Load(ctx any) *gomock.Call {
 }
 
 // Store mocks base method.
-func (m *MockCacheStorage) Store(ctx context.Context, versions map[VersionType][]SDKVersion) {
+func (m *MockCacheStorage) Store(ctx context.Context, versions MapSdkVersionGroupType) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Store", ctx, versions)
 }
@@ -80,16 +81,16 @@ func (mr *MockCacheStorageMockRecorder) Store(ctx, versions any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Store", reflect.TypeOf((*MockCacheStorage)(nil).Store), ctx, versions)
 }
 
-// Valid mocks base method.
-func (m *MockCacheStorage) Valid(ctx context.Context) bool {
+// Validate mocks base method.
+func (m *MockCacheStorage) Validate(ctx context.Context) bool {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Valid", ctx)
+	ret := m.ctrl.Call(m, "Validate", ctx)
 	ret0, _ := ret[0].(bool)
 	return ret0
 }
 
-// Valid indicates an expected call of Valid.
-func (mr *MockCacheStorageMockRecorder) Valid(ctx any) *gomock.Call {
+// Validate indicates an expected call of Validate.
+func (mr *MockCacheStorageMockRecorder) Validate(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Valid", reflect.TypeOf((*MockCacheStorage)(nil).Valid), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Validate", reflect.TypeOf((*MockCacheStorage)(nil).Validate), ctx)
 }

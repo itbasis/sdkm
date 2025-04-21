@@ -55,10 +55,10 @@ func (mr *MockCacheMockRecorder) GoString() *gomock.Call {
 }
 
 // Load mocks base method.
-func (m *MockCache) Load(ctx context.Context, versionType VersionType) []SDKVersion {
+func (m *MockCache) Load(ctx context.Context, versionType VersionType) SdkVersionList {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Load", ctx, versionType)
-	ret0, _ := ret[0].([]SDKVersion)
+	ret0, _ := ret[0].(SdkVersionList)
 	return ret0
 }
 
@@ -69,7 +69,7 @@ func (mr *MockCacheMockRecorder) Load(ctx, versionType any) *gomock.Call {
 }
 
 // Store mocks base method.
-func (m *MockCache) Store(ctx context.Context, versionType VersionType, sdkVersions []SDKVersion) {
+func (m *MockCache) Store(ctx context.Context, versionType VersionType, sdkVersions SdkVersionList) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Store", ctx, versionType, sdkVersions)
 }

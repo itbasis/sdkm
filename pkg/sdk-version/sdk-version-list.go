@@ -1,9 +1,8 @@
 package sdkversion
 
 import (
-	"fmt"
+	"encoding/json"
 	"iter"
-	"log/slog"
 	"sort"
 
 	"github.com/pkg/errors"
@@ -12,12 +11,17 @@ import (
 type SdkVersionList interface {
 	sort.Interface
 
+	IsEmpty() bool
 	Add(sdkVersions ...SDKVersion)
+
 	First() (SDKVersion, error)
 	Seq() iter.Seq[SDKVersion]
 
 	AsList() []SDKVersion
 	AsMap() map[string]SDKVersion
+
+	json.Unmarshaler
+	json.Marshaler
 }
 
 type _sdkVersionList struct {
@@ -32,9 +36,11 @@ func (r *_sdkVersionList) Add(sdkVersion ...SDKVersion) {
 	r.list = append(r.list, sdkVersion...)
 }
 
+func (r *_sdkVersionList) IsEmpty() bool { return len(r.list) == 0 }
+
 func (r *_sdkVersionList) First() (SDKVersion, error) {
 	if len(r.list) == 0 {
-		return nil, errors.WithMessage(ErrSDKVersionNotFound, "list is empty")
+		return EmptySdkVersion, errors.WithMessage(ErrSDKVersionNotFound, "list is empty")
 	}
 
 	return r.list[0], nil
@@ -69,25 +75,19 @@ func (r _sdkVersionList) Len() int {
 }
 
 func (r *_sdkVersionList) Less(i, j int) (result bool) {
+	if len(r.list) == 0 {
+		return false
+	}
+
 	var (
 		sdkI = r.list[i]
 		sdkJ = r.list[j]
 
-		idI   = sdkI.GetId()
-		idJ   = sdkJ.GetId()
 		typeI = sdkI.GetType()
 		typeJ = sdkJ.GetType()
 	)
 
-	slog.Debug("comparison to less", slog.String("sdk[i]", idI), slog.String("sdk[j]", idJ))
-
-	defer func() {
-		slog.Debug(fmt.Sprintf("%s less %s: %t", idI, idJ, result))
-	}()
-
 	if sdkI.GetType() == sdkJ.GetType() {
-		slog.Debug(fmt.Sprintf("sort by semver: i=%s, j=%s", sdkI.GetId(), sdkJ.GetId()))
-
 		return sdkI.GetSemVer().GreaterThan(sdkJ.GetSemVer())
 	}
 
@@ -104,4 +104,12 @@ func (r *_sdkVersionList) Less(i, j int) (result bool) {
 
 func (r *_sdkVersionList) Swap(i, j int) {
 	r.list[i], r.list[j] = r.list[j], r.list[i]
+}
+
+func (r *_sdkVersionList) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, &r.list)
+}
+
+func (r *_sdkVersionList) MarshalJSON() ([]byte, error) {
+	return json.Marshal(r.list)
 }

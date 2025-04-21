@@ -1,11 +1,10 @@
 package sdkversion
 
 import (
-	"fmt"
+	"encoding/json"
 	"log/slog"
 	"regexp"
 	"strconv"
-	"strings"
 
 	"github.com/Masterminds/semver/v3"
 	itbasisCoreLog "github.com/itbasis/go-tools-core/log"
@@ -26,30 +25,25 @@ const (
 	TypeArchived VersionType = "archived"
 )
 
-type SDKVersion interface {
-	GetId() string
-	GetType() VersionType
-	HasInstalled() bool
-	SetInstalled(flag bool)
+type SDKVersion struct {
+	id          string
+	versionType VersionType
 
-	Print() string
-	PrintWithOptions(outType, outInstalled, outNotInstalled bool) string
-
-	GetSemVer() *semver.Version
+	installed bool
+	semVer    *semver.Version
 }
 
-type _sdkVersion struct {
-	ID   string
-	Type VersionType
-
-	installed bool            `json:"-"`
-	semVer    *semver.Version `json:"-"`
+type _jsonSdkVersion struct {
+	ID   string      `json:"id"`
+	Type VersionType `json:"type"`
 }
+
+var EmptySdkVersion = SDKVersion{}
 
 func NewSDKVersion(id string, versionType VersionType, installed bool) SDKVersion {
-	var sdkVersion = &_sdkVersion{ID: id, Type: versionType, installed: installed}
+	var sdkVersion = SDKVersion{id: id, versionType: versionType, installed: installed}
 
-	if sv, err := makeSemVer(sdkVersion.ID); err != nil {
+	if sv, err := makeSemVer(sdkVersion.id); err != nil {
 		slog.Error("fail parsing semver", itbasisCoreLog.SlogAttrError(err))
 	} else {
 		sdkVersion.semVer = sv
@@ -58,22 +52,38 @@ func NewSDKVersion(id string, versionType VersionType, installed bool) SDKVersio
 	return sdkVersion
 }
 
-func (r *_sdkVersion) GetId() string             { return r.ID }
-func (r *_sdkVersion) GetType() VersionType      { return r.Type }
-func (r *_sdkVersion) HasInstalled() bool        { return r.installed }
-func (r *_sdkVersion) SetInstalled(flag bool)    { r.installed = flag }
-func (r _sdkVersion) GetSemVer() *semver.Version { return r.semVer }
+func (r *SDKVersion) GetId() string             { return r.id }
+func (r *SDKVersion) GetType() VersionType      { return r.versionType }
+func (r *SDKVersion) HasInstalled() bool        { return r.installed }
+func (r *SDKVersion) SetInstalled(flag bool)    { r.installed = flag }
+func (r SDKVersion) GetSemVer() *semver.Version { return r.semVer }
+
+func (r *SDKVersion) UnmarshalJSON(data []byte) error {
+	var m = &_jsonSdkVersion{}
+	if err := json.Unmarshal(data, m); err != nil {
+		return err
+	}
+
+	r.id = m.ID
+	r.versionType = m.Type
+	if sv, err := makeSemVer(r.id); err != nil {
+		return err
+	} else {
+		r.semVer = sv
+	}
+
+	return nil
+}
+func (r SDKVersion) MarshalJSON() ([]byte, error) {
+	return json.Marshal(_jsonSdkVersion{ID: r.id, Type: r.versionType})
+}
 
 func makeSemVer(id string) (*semver.Version, error) {
 	if id == "" {
 		return nil, semver.ErrEmptyString
 	}
 
-	slog.Debug("sdk version id=" + id)
-
 	m := _reSemVer.FindStringSubmatch(id)
-
-	slog.Debug(fmt.Sprintf("matches (len=%d): %s", len(m), strings.Join(m, ",")))
 
 	if len(m) < 1 {
 		return nil, semver.ErrInvalidSemVer

@@ -2,15 +2,23 @@ package sdkversion
 
 import (
 	"context"
+	"errors"
 	"fmt"
+)
+
+type MapSdkVersionGroupType = map[VersionType][]SDKVersion
+
+var (
+	ErrCacheNotFoundFile = errors.New("cache file not found")
+	ErrCacheInvalidFile  = errors.New("fail cache file")
+	ErrCacheExpired      = errors.New("cache expired")
 )
 
 //go:generate mockgen -source=$GOFILE -package=$GOPACKAGE -destination=cache-storage.mock.go
 type CacheStorage interface {
 	fmt.GoStringer
 
-	Valid(ctx context.Context) bool
-
-	Load(ctx context.Context) map[VersionType][]SDKVersion
-	Store(ctx context.Context, versions map[VersionType][]SDKVersion)
+	Validate(ctx context.Context) bool
+	Load(ctx context.Context) (MapSdkVersionGroupType, error)
+	Store(ctx context.Context, versions MapSdkVersionGroupType)
 }

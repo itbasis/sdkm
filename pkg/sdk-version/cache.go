@@ -12,6 +12,6 @@ type Cache interface {
 	WithExternalStore(cacheStorage CacheStorage) Cache
 
 	Valid(ctx context.Context) bool
-	Load(ctx context.Context, versionType VersionType) []SDKVersion
-	Store(ctx context.Context, versionType VersionType, sdkVersions []SDKVersion)
+	Load(ctx context.Context, versionType VersionType) SdkVersionList
+	Store(ctx context.Context, versionType VersionType, sdkVersions SdkVersionList)
 }

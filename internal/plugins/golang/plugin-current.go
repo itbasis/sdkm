@@ -16,7 +16,7 @@ func (receiver *goPlugin) Current(ctx context.Context, rebuildCache, onlyInstall
 	if errGoModFile != nil {
 		slog.Error("Failed to read go.mod file", itbasisCoreLog.SlogAttrError(errGoModFile))
 
-		return nil, errGoModFile //nolint:wrapcheck // TODO
+		return sdkmSDKVersion.EmptySdkVersion, errGoModFile //nolint:wrapcheck // TODO
 	}
 
 	var (
@@ -30,7 +30,7 @@ func (receiver *goPlugin) Current(ctx context.Context, rebuildCache, onlyInstall
 		var prefix = goModFile.Go.Version
 
 		if strings.HasSuffix(prefix, ".0") && strings.Count(prefix, ".") == 2 {
-			prefix = prefix[0:len(prefix) - 2]
+			prefix = prefix[0 : len(prefix)-2]
 		}
 
 		sdkVersion, err = receiver.LatestVersionByPrefix(ctx, rebuildCache, onlyInstalled, prefix)
@@ -39,7 +39,7 @@ func (receiver *goPlugin) Current(ctx context.Context, rebuildCache, onlyInstall
 	slog.Debug(fmt.Sprintf("sdkVersion: %++v", sdkVersion))
 
 	if err != nil {
-		return nil, err
+		return sdkmSDKVersion.EmptySdkVersion, err
 	}
 
 	return sdkVersion, nil

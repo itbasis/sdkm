@@ -10,119 +10,60 @@ import (
 	"sync"
 	"time"
 
-	"github.com/itbasis/go-clock/v2"
 	itbasisCoreLog "github.com/itbasis/go-tools-core/log"
 	itbasisCoreOs "github.com/itbasis/go-tools-core/os"
 	sdkmPlugin "github.com/itbasis/go-tools-sdkm/pkg/plugin"
-	itbasisSdkmSDKVersion "github.com/itbasis/go-tools-sdkm/pkg/sdk-version"
+	sdkmSDKVersion "github.com/itbasis/go-tools-sdkm/pkg/sdk-version"
+	"github.com/jonboulle/clockwork"
 )
 
 const (
 	cacheExpirationDuration = 24 * time.Hour
 )
 
-var (
-	emptyLoadResult = map[itbasisSdkmSDKVersion.VersionType][]itbasisSdkmSDKVersion.SDKVersion{}
-)
-
-type fileStorage struct {
+type _fileStorage struct {
 	lock sync.Mutex
 
 	filePath string
 }
 
-func NewFileCacheStorage(pluginID sdkmPlugin.ID) itbasisSdkmSDKVersion.CacheStorage {
-	return NewFileCacheStorageCustomPath(path.Join(itbasisCoreOs.ExecutableDir(), ".cache", string(pluginID)+".json"))
-}
+func NewFileCacheStorage(rootDir string, pluginId sdkmPlugin.ID) sdkmSDKVersion.CacheStorage {
+	slog.Debug("init file cache storage",
+		slog.String("rootDir", rootDir),
+		sdkmPlugin.SlogAttrPluginId(pluginId),
+	)
 
-func NewFileCacheStorageCustomPath(filePath string) itbasisSdkmSDKVersion.CacheStorage {
+	var filePath = path.Join(rootDir, string(pluginId)+".json")
 	slog.Debug("using cache with file path: " + filePath)
 
-	return &fileStorage{filePath: filePath}
+	return &_fileStorage{filePath: filePath}
 }
 
-func (receiver *fileStorage) GoString() string {
-	return "FileCacheStorage[file=" + receiver.filePath + "]"
+func (r *_fileStorage) GoString() string {
+	return "FileCacheStorage[" + r.filePath + "]"
 }
 
-func (receiver *fileStorage) Valid(ctx context.Context) bool {
-	filePath := receiver.filePath
+func (r *_fileStorage) Validate(ctx context.Context) bool {
+	var _, err = r.load(ctx)
 
-	slog.Debug("validating with file path: " + filePath)
-
-	if filePath == "" {
-		slog.Debug("file path is empty: " + filePath)
-
-		return false
-	}
-
-	fileInfo, errStat := os.Stat(filePath)
-	if errStat != nil && os.IsNotExist(errStat) {
-		slog.Debug("cache file not found: " + filePath)
-
-		return false
-	} else if errStat != nil {
-		slog.Error("AttrError accessing cache file", itbasisCoreLog.SlogAttrError(errStat))
-
-		return false
-	}
-
-	if clock.FromContext(ctx).Now().Sub(fileInfo.ModTime()) >= cacheExpirationDuration {
-		slog.Debug("cache file has been expired: " + filePath)
-
-		return false
-	}
-
-	return true
+	return err == nil
 }
 
-func (receiver *fileStorage) Load(ctx context.Context) map[itbasisSdkmSDKVersion.VersionType][]itbasisSdkmSDKVersion.SDKVersion {
-	receiver.lock.Lock()
-	defer receiver.lock.Unlock()
-
-	var filePath = receiver.filePath
-
-	slog.Debug("loading cache from file: " + filePath)
-
-	if !receiver.Valid(ctx) {
-		return emptyLoadResult
-	}
-
-	var bytes, errReadFile = os.ReadFile(filePath)
-	if errReadFile != nil {
-		slog.Error("error reading cache file: "+filePath, itbasisCoreLog.SlogAttrError(errReadFile))
-
-		return emptyLoadResult
-	}
-
-	var model model
-
-	if errUnmarshal := json.Unmarshal(bytes, &model); errUnmarshal != nil {
-		slog.Error(
-			"error unmarshalling cache file",
-			itbasisCoreLog.SlogAttrError(errUnmarshal),
-			itbasisCoreLog.SlogAttrFilePath(filePath),
-		)
-
-		return emptyLoadResult
-	}
-
-	slog.Debug("loaded cache from file: " + filePath)
-
-	return model.Versions
+func (r *_fileStorage) Load(ctx context.Context) (sdkmSDKVersion.MapSdkVersionGroupType, error) {
+	return r.load(ctx)
 }
 
-func (receiver *fileStorage) Store(ctx context.Context, versions map[itbasisSdkmSDKVersion.VersionType][]itbasisSdkmSDKVersion.SDKVersion) {
-	receiver.lock.Lock()
-	defer receiver.lock.Unlock()
+func (r *_fileStorage) Store(ctx context.Context, versions sdkmSDKVersion.MapSdkVersionGroupType) {
+	r.lock.Lock()
+	defer r.lock.Unlock()
 
-	filePath := receiver.filePath
+	filePath := r.filePath
 
 	slog.Debug("storing cache to file: " + filePath)
 
 	var bytes, errMarshal = json.Marshal(
 		model{
-			Updated:  updated(clock.FromContext(ctx).Now()),
+			Updated:  updated(clockwork.FromContext(ctx).Now()),
 			Versions: versions,
 		},
 	)
@@ -147,4 +88,70 @@ func (receiver *fileStorage) Store(ctx context.Context, versions map[itbasisSdkm
 	if errWriteFile := os.WriteFile(filePath, bytes, itbasisCoreOs.DefaultFileMode); errWriteFile != nil {
 		slog.Error("error writing cache file: "+filePath, itbasisCoreLog.SlogAttrError(errWriteFile))
 	}
+}
+
+func (r *_fileStorage) load(ctx context.Context) (sdkmSDKVersion.MapSdkVersionGroupType, error) {
+	var bytes, errRead = r.readFile()
+	if errRead != nil {
+		return nil, errRead
+	}
+
+	var m model
+	if err := json.Unmarshal(bytes, &m); err != nil {
+		slog.Error("fail unmarshalling cache file",
+			itbasisCoreLog.SlogAttrFilePath(r.filePath),
+			itbasisCoreLog.SlogAttrError(err),
+		)
+
+		return nil, sdkmSDKVersion.ErrCacheInvalidFile
+	}
+
+	if !r.validate(ctx, m) {
+		return nil, sdkmSDKVersion.ErrCacheExpired
+	}
+
+	return m.Versions, nil
+}
+
+func (r *_fileStorage) readFile() ([]byte, error) {
+	var filePath = r.filePath
+
+	slog.Debug("reading cache file", itbasisCoreLog.SlogAttrFilePath(filePath))
+
+	if _, err := os.Stat(filePath); err != nil && os.IsNotExist(err) {
+		slog.Debug("cache file not found", itbasisCoreLog.SlogAttrFilePath(filePath))
+
+		return nil, sdkmSDKVersion.ErrCacheNotFoundFile
+	} else if err != nil {
+		slog.Error("fail accessing cache file", itbasisCoreLog.SlogAttrError(err))
+
+		return nil, sdkmSDKVersion.ErrCacheInvalidFile
+	}
+
+	var bytes, errReadFile = os.ReadFile(filePath)
+	if errReadFile != nil {
+		slog.Error("fail reading cache file", itbasisCoreLog.SlogAttrFilePath(filePath), itbasisCoreLog.SlogAttrError(errReadFile))
+
+		return nil, sdkmSDKVersion.ErrCacheInvalidFile
+	}
+
+	return bytes, nil
+}
+
+func (r *_fileStorage) validate(ctx context.Context, m model) bool {
+	var (
+		now    = clockwork.FromContext(ctx).Now()
+		sub    = now.Sub(time.Time(m.Updated))
+		result = sub <= cacheExpirationDuration
+	)
+
+	slog.Debug("validate",
+		slog.Time("cache date", time.Time(m.Updated)),
+		slog.Duration("expiration", cacheExpirationDuration),
+		slog.Time("current date", now),
+		slog.Duration("sub", sub),
+		slog.Bool("valid", result),
+	)
+
+	return result
 }

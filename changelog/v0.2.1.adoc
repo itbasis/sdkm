@@ -1,0 +1,9 @@
+= v0.2.0
+:icons: font
+
+[no-bullet]
+- icon:wrench[] Fixed bug with using `--with-uninstalled` parameter
+- icon:wrench[] Fixed a bug with file cache
+- icon:wrench[] Changed date format in file cache
+- icon:wrench[] Replacing library `github.com/itbasis/go-clock/v2` with `github.com/jonboulle/clockwork`
+- icon:wrench[] Other code refactoring

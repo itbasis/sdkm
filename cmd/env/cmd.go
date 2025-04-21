@@ -19,6 +19,9 @@ func NewEnvCommand() *cobra.Command {
 		Short: "Displays environment variables inside the environment used for the plugin",
 	}
 
+	sdkmCmd.InitFlagRebuildCache(cmd.PersistentFlags())
+	sdkmCmd.InitFlagWithUninstalled(cmd.PersistentFlags())
+
 	sdkmPlugins.AddPluginsAsSubCommands(
 		cmd, func(cmdChild *cobra.Command) {
 			cmdChild.Use = itbasisCoreCmd.BuildUse(cmdChild.Use, sdkmCmd.UseArgVersion)
@@ -33,16 +36,18 @@ func NewEnvCommand() *cobra.Command {
 
 func _run(cmd *cobra.Command, args []string) {
 	var (
-		sdkmPlugin = sdkmPlugins.GetPluginByID(cmd)
-		envMap     map[string]string
-		err        error
+		sdkmPlugin        = sdkmPlugins.GetPluginByID(cmd)
+		flagRebuildCache  = sdkmCmd.IsFlagRebuildCache(cmd)
+		flagOnlyInstalled = !sdkmCmd.IsFlagWithUninstalled(cmd)
+		envMap            map[string]string
+		err               error
 	)
 
 	if len(args) == 0 {
 		envMap, err = sdkmPlugin.Env(
 			cmd.Context(),
-			sdkmCmd.IsFlagRebuildCache(cmd),
-			!sdkmCmd.IsFlagWithUninstalled(cmd),
+			flagRebuildCache,
+			flagOnlyInstalled,
 			itbasisCoreOs.Pwd(),
 		)
 	} else {

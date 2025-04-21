@@ -27,6 +27,9 @@ func (receiver *goPlugin) InitProcessCommandFlags(cmd *cobra.Command) {
 
 	receiver.sdkVersions = receiver.sdkVersions.WithCache(
 		sdkmCache.NewCache().
-			WithExternalStore(cacheFileStorage.NewFileCacheStorage(pluginGoConsts.PluginID)),
+			WithExternalStore(cacheFileStorage.NewFileCacheStorage(
+				path.Join(itbasisCoreOs.ExecutableDir(), ".cache"),
+				pluginGoConsts.PluginID,
+			)),
 	)
 }
