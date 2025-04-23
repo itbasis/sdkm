@@ -1,0 +1,5 @@
+= v0.2.2
+:icons: font
+
+[no-bullet]
+- icon:wrench[] Fixed cache saving error

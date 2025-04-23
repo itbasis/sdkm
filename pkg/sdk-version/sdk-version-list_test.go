@@ -94,8 +94,4 @@ var _ = ginkgo.Describe("SdkVersionList", func() {
 			))
 	})
 	})
-
-	ginkgo.Describe("UnmarshalJSON", func() {
-
-	})
 })

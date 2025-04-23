@@ -61,7 +61,11 @@ func (receiver *cache) Store(ctx context.Context, versionType sdkmSDKVersion.Ver
 	receiver.storeLock.Lock()
 	defer receiver.storeLock.Unlock()
 
-	receiver.cache[versionType] = sdkVersionList.AsList()
+	if receiver.cache == nil {
+		receiver.cache = sdkmSDKVersion.MapSdkVersionGroupType{versionType: sdkVersionList.AsList()}
+	} else {
+		receiver.cache[versionType] = sdkVersionList.AsList()
+	}
 
 	if receiver.cacheStorage != nil {
 		receiver.cacheStorage.Store(ctx, receiver.cache)
