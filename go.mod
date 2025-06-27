@@ -3,7 +3,7 @@ module github.com/itbasis/go-tools-sdkm
 go 1.24.2
 
 require (
-	github.com/Masterminds/semver/v3 v3.3.1
+	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/itbasis/go-test-utils/v5 v5.0.2
 	github.com/itbasis/go-tools-core v0.1.0
 	github.com/jonboulle/clockwork v0.5.0
